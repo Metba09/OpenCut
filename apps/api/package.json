@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "build": "wrangler deploy --dry-run"
+    "build": "wrangler deploy --dry-run",
+    "test": "vitest run"
   },
   "dependencies": {
-    "elysia": "latest"
+    "elysia": "^1.4.30"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "latest",
-    "wrangler": "latest"
+    "@cloudflare/workers-types": "^5.20261025.1",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.152.0"
   }
 }

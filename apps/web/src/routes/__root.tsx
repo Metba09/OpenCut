@@ -26,19 +26,6 @@ export const Route = createRootRoute({
         type: 'image/x-icon',
       },
       {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossOrigin: 'anonymous',
-      },
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&display=swap',
-      },
-      {
         rel: 'stylesheet',
         href: appCss,
       },

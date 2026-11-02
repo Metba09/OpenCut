@@ -1,0 +1,5 @@
+{
+  "name": "opencut-workspace",
+  "private": true,
+  "workspaces": ["apps/web", "apps/api"]
+}

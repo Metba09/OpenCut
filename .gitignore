@@ -8,3 +8,7 @@ docs/
 
 # moon runtime cache
 .moon/cache/
+
+# Sandbox / bundle hermétique (artefacts volumineux, non versionnés)
+bundle/
+vendor/
