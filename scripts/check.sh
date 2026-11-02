@@ -13,6 +13,7 @@ step "garde hors-réseau"      bash scripts/verify-offline.sh
 step "typecheck web"          npm --workspace apps/web exec -- tsc --noEmit
 step "tests web"              npm --workspace apps/web run test --silent
 step "tests API"              npm --workspace apps/api run test --silent
+step "montage vidéo (tests ffmpeg)" node --test tools/montage/montage.test.mjs
 step "build web"              npm --workspace apps/web run build --silent
 step "build API (dry-run)"    bash -c 'cd apps/api && wrangler deploy --dry-run --outdir "${TMPDIR:-/tmp}/opencut-api-dist" >/dev/null'
 

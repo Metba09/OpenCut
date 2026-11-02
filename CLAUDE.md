@@ -1,7 +1,7 @@
 # OpenCut — consignes pour Claude
 
 Éditeur vidéo open source en réécriture. Monorepo : `apps/web` (TanStack Start + Vite 8 + React 19, cible Cloudflare Workers),
-`apps/api` (Elysia sur Workers), `apps/desktop` (Rust + GPUI), `crates/media` (script de setup FFmpeg).
+`apps/api` (Elysia sur Workers), `apps/desktop` (Rust + GPUI), `crates/media` (script de setup FFmpeg), `tools/montage` (montage vidéo headless, ajout du bundle sandbox).
 Toute la logique vit dans `scripts/` et le `Makefile` ; `.claude/commands/` ne contient que de fins alias.
 
 ## Session Chat (Claude.ai, sandbox isolé)
@@ -24,6 +24,11 @@ Outils : Node ≥ 22.12 + npm. **Ne pas utiliser** bun, moon, proto : non instal
 - `crates/media` : le prebuilt FFmpeg épinglé renvoie 404 et ffmpeg.org est bloqué ; rien de vendoré.
 - `wrangler deploy` réel, `moon run upload-logos` (R2) : exigent des secrets Cloudflare. Aucun secret n'est requis ailleurs.
 - `vite dev` n'est pas joignable depuis le navigateur de la personne ; utiliser `make smoke` ou `curl` local.
+
+**Montage vidéo** : l'éditeur OpenCut n'existe pas encore (`/editor` = « Coming soon »). Pour monter dans le sandbox, utiliser
+`tools/montage/` : un projet JSON (clips, découpes, vitesse, transitions, textes, musique, sous-titres) rendu par FFmpeg en MP4.
+`make montage PROJECT=projet.json` · `make montage-demo` · format et limites : `tools/montage/README.md`. Ne pas le présenter comme
+l'éditeur OpenCut ; c'est un rendu scripté, sans aperçu interactif ni timeline graphique.
 
 **Commandes à lire à la demande** : `.claude/commands/setup.md`, `check.md`, `smoke.md`.
 **Hooks** : aucun ; remplacés par `scripts/check.sh` (et `scripts/verify-offline.sh`, garde anti-ressources externes).
