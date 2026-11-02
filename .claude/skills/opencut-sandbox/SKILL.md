@@ -6,18 +6,18 @@ description: Reprendre et faire évoluer le projet OpenCut (éditeur vidéo open
 # OpenCut en sandbox de session Chat
 
 Le sandbox repart de zéro à chaque session et ne joint que GitHub et les registres de paquets. Ce skill ramène OpenCut
-(web + API) à un état installé, testé et sauvegardable en quelques commandes, **sans réseau après le téléchargement du bundle**.
-Le bundle (source + cache npm vendoré, ~141 Mo) n'est pas dans le skill : il vit dans `Metba09/claude-memory`,
-dossier `livrables/opencut-sandbox/`. Le skill n'apporte que les scripts pour l'utiliser.
+(web + API + montage vidéo headless) à un état installé, testé et sauvegardable, **sans réseau après le téléchargement du bundle**.
+Tout vient du fork public `Metba09/OpenCut` : le code sur la branche `sandbox-skill`, le cache npm vendoré (~146 Mo) sur la branche
+orpheline `sandbox-bundle`. Aucun jeton n'est nécessaire pour lire. Repli : la mémoire privée `claude-memory`
+(`livrables/opencut-sandbox/`) si le fork est inaccessible.
 
 ## Démarrer
 
 1. Vérifier l'état : `bash scripts/doctor.sh` (chemin relatif au dossier de ce skill).
-2. Si `~/.memenv` manque, rattacher la mémoire avec le skill `github-memory` (jeton GitHub fine-grained sur `claude-memory`).
-   Ne jamais afficher ni écrire le jeton ailleurs que dans `~/.memenv`.
-3. `bash scripts/bootstrap.sh [dossier]` (défaut `~/OpenCut`) : télécharge le bundle, extrait la source, lance `make setup`.
-   Idempotent ; relançable sans casser.
-4. `cd ~/OpenCut && make check` : doit finir par « TOUT EST VERT » (garde hors-réseau, typecheck, tests web + API, build web, build API).
+2. `bash scripts/bootstrap.sh [dossier]` (défaut `~/OpenCut`) : clone le fork, puis `make setup` télécharge le bundle une fois et
+   installe hors-ligne. Idempotent ; relançable sans casser. Le repli mémoire exige `~/.memenv` (skill `github-memory`) ; ne jamais
+   afficher ni écrire un jeton ailleurs que dans `~/.memenv`.
+3. `cd ~/OpenCut && make check` : doit finir par « TOUT EST VERT » (garde hors-réseau, typecheck, tests web + API + montage, builds).
    Si ce n'est pas vert avant toute modification, s'arrêter et lire `references/troubleshooting.md`.
 
 ## Travailler
@@ -28,8 +28,7 @@ dossier `livrables/opencut-sandbox/`. Le skill n'apporte que les scripts pour l'
 - Le code est dans `apps/web` (TanStack Start, Vite 8, React 19, Tailwind 4, shadcn), `apps/api` (Elysia sur Workers).
   `CLAUDE.md` à la racine du projet décrit les écarts avec l'amont : le lire avant une modification structurante.
 - Ajouter une dépendance : `npm install <pkg> --workspace apps/web --before=<date du jour − 7 jours>` (règle `minimumReleaseAge`
-  du repo), puis `make vendor` pour régénérer le bundle. Ces deux étapes ont besoin du registre npm, joignable depuis le sandbox.
-  Sans `make vendor`, la prochaine session ne pourra pas installer hors-ligne.
+  du repo), puis `make vendor` pour régénérer le bundle (voir « Sauvegarder »). Ces deux étapes ont besoin du registre npm.
 
 ## Monter une vidéo
 
@@ -51,11 +50,14 @@ d'aperçu interactif ; rendu sur 1 cœur et 3 Go de RAM, donc éviter la 4K et l
 
 Tout disparaît avec le sandbox. Une fois `make check` vert :
 
-1. `bash scripts/repack.sh [dossier]` : crée `opencut-source.tar.gz` dans `~/memory/livrables/opencut-sandbox/` (sans `node_modules`, `.env`, builds).
-2. Si le lockfile a changé : `OUT=~/memory/livrables/opencut-sandbox make vendor` pour remplacer les morceaux du cache npm.
-3. `cd ~/memory && . ~/.memenv && $MS status`, montrer la liste à l'utilisateur, puis `$MS push -m "livrables: opencut-sandbox <résumé>"`.
-
-Les fichiers ne sont envoyés que par `memsync push` : le jeton ne couvre pas le fork `Metba09/OpenCut`.
+1. **Dans le fork** (si l'utilisateur fournit un jeton fine-grained Contents RW sur `Metba09/OpenCut`) : `git add -A && git commit`, puis
+   `git -c http.extraheader="Authorization: Basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)" push fork <branche>`.
+   Le jeton reste dans une variable de la commande : jamais dans `.git/config`, un fichier ou une réponse. Pousser sur une branche,
+   pas sur `main` (qui doit rester alignée sur l'amont), sauf demande explicite.
+2. **Dans la mémoire privée** (copie de secours, sans jeton fork) : `bash scripts/repack.sh [dossier]`, puis
+   `cd ~/memory && . ~/.memenv && $MS status`, montrer la liste, `$MS push -m "livrables: opencut-sandbox <résumé>"`.
+3. Si le lockfile a changé : `make vendor`, puis `GH_PUSH_TOKEN=... bash scripts/publish-bundle.sh` (remplace la branche `sandbox-bundle`)
+   et, pour la mémoire, `OUT=~/memory/livrables/opencut-sandbox make vendor`. Sans cela, la prochaine session ne pourra pas installer hors-ligne.
 
 ## Ce qui ne marche pas ici
 

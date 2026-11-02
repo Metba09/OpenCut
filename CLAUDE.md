@@ -7,9 +7,12 @@ Toute la logique vit dans `scripts/` et le `Makefile` ; `.claude/commands/` ne c
 ## Session Chat (Claude.ai, sandbox isolé)
 
 **Démarrage depuis zéro** (le sandbox est vierge à chaque session ; seul GitHub est joignable) :
-1. Rattacher la mémoire (`/github-memory`), puis `bash scripts/bootstrap-from-memory.sh` si le code est absent
-   (sinon : `memsync sparse livrables/opencut-sandbox --dest /tmp/ocs`, extraire `opencut-source.tar.gz`).
-2. `make setup` — idempotent, sans saisie, **sans réseau** : restaure le cache npm vendoré, `npm ci --offline`, `.env`.
+1. Depuis le fork public, sans jeton :
+   `git clone --depth 1 -b sandbox-skill https://github.com/Metba09/OpenCut.git ~/OpenCut && cd ~/OpenCut`
+   (variante via la mémoire privée : `/github-memory`, puis `bash scripts/bootstrap-from-memory.sh`).
+2. `make setup` — idempotent, sans saisie : si le cache npm vendoré est absent, il est téléchargé (une fois, ~146 Mo) depuis la
+   branche `sandbox-bundle` du fork ; ensuite tout est **hors-réseau** : `npm ci --offline`, scripts natifs, `.env`.
+   `OPENCUT_OFFLINE=1` interdit tout téléchargement ; `OPENCUT_BUNDLE_DIR=<dossier>` indique un bundle déjà présent.
 3. `make check` — à lancer à la main avant de conclure : garde hors-réseau, typecheck, tests web + API, build web, build API.
    Tout est vert = projet sain. Validé sous `unshare -rn` (réseau coupé) sur une copie vierge.
 
@@ -40,4 +43,5 @@ l'éditeur OpenCut ; c'est un rendu scripté, sans aperçu interactif ni timelin
 `package.json` racine (workspaces) + `package-lock.json` ajoutés ; dépendances `latest` épinglées ; résolution faite avec
 `npm install --before=<aujourd'hui − 7 jours>` pour respecter `minimumReleaseAge` de `bunfig.toml`. `apps/web/vitest.config.ts`
 isolé (le `vite.config.ts` plante vitest) ; 3 erreurs TypeScript corrigées (`calendar`, `scroll-area`, `spinner`) ; tests d'amorçage ajoutés.
-Régénérer le bundle après un changement du lockfile : `make vendor` (réseau requis).
+Régénérer le bundle après un changement du lockfile : `make vendor` (réseau requis), puis le pousser sur la branche orpheline `sandbox-bundle`
+(`scripts/publish-bundle.sh`).
