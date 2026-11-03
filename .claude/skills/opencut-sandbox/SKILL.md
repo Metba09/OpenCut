@@ -41,7 +41,11 @@ scripté (projet JSON -> FFmpeg -> MP4). Le dire à l'utilisateur dès qu'il dem
 3. Valider sans rendre : `node tools/montage/montage.mjs projet.json --dry-run --print-graph`. Les incohérences sont refusées avec un message précis.
 4. Rendre : `make montage PROJECT=projet.json`. Contrôler le résultat avec `ffprobe` et en extrayant 2 ou 3 images
    (`ffmpeg -ss <t> -i out.mp4 -frames:v 1 f.png`) pour vérifier textes et transitions avant de livrer.
-5. Copier le MP4 dans `/mnt/user-data/outputs/` et le présenter (`present_files`). Pas dans la mémoire GitHub : trop lourd.
+5. Livrer : copier le MP4 dans `/mnt/user-data/outputs/` et le présenter (`present_files`). C'est la livraison principale.
+6. Archiver (règle validée par l'utilisateur) : si le MP4 fait moins de 40 Mo, `bash scripts/publish-montage.sh projet.json <sujet>`
+   le dépose avec `projet.json` dans `~/memory/livrables/montage/<date-sujet>/`, puis `$MS status` et `$MS push -m "livrables: montage <sujet>"`.
+   Le script refuse un MP4 de 40 Mo ou plus (code 3) : dans ce cas ne rien pousser, le dire, la livraison par téléchargement suffit.
+   Ne jamais pousser les vidéos sources, ni le dossier de travail.
 
 Limites à annoncer : une seule piste vidéo (pas de superposition d'images), pas d'effets par clip, pas d'animation de texte, pas
 d'aperçu interactif ; rendu sur 1 cœur et 3 Go de RAM, donc éviter la 4K et les vidéos de plusieurs minutes sans prévenir.
