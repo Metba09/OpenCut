@@ -23,8 +23,10 @@ Outils : Node ≥ 22.12 + npm. **Ne pas utiliser** bun, moon, proto : non instal
 `wrangler deploy --dry-run`, `vite build`, typecheck.
 
 **Inutilisable dans le sandbox** :
-- `apps/desktop` (GPUI) : pas de GPU ni d'affichage, pas de toolchain Rust. Sources non modifiées ; `scripts/vendor-rust.sh` vendore les ~700 crates (124 Mo) pour un autre environnement.
-- `crates/media` : le prebuilt FFmpeg épinglé renvoie 404 et ffmpeg.org est bloqué ; rien de vendoré.
+- `apps/desktop` (GPUI) : pas de GPU ni d'affichage, pas de toolchain Rust. **Compilation vérifiée sur un runner GitHub Actions** via claude-bridge
+  (`cargo check --locked`, 199 s, code 0) ; `scripts/vendor-rust.sh` vendore les ~700 crates (124 Mo) pour un autre environnement.
+- `crates/media` : le prebuilt FFmpeg épinglé renvoie 404 et ffmpeg.org est bloqué ici. FFmpeg 8.1.3 a été **compilé sur le runner** depuis les sources
+  épinglées (616 s) ; archive LGPL de 8 Mo dans la mémoire privée (`livrables/bridge/2026-11-03-ffmpeg-libs/`). Recettes : skill `sandbox-bridge`.
 - `wrangler deploy` réel, `moon run upload-logos` (R2) : exigent des secrets Cloudflare. Aucun secret n'est requis ailleurs.
 - `vite dev` n'est pas joignable depuis le navigateur de la personne ; utiliser `make smoke` ou `curl` local.
 

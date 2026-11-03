@@ -63,9 +63,13 @@ Tout disparaît avec le sandbox. Une fois `make check` vert :
 3. Si le lockfile a changé : `make vendor`, puis `GH_PUSH_TOKEN=... bash scripts/publish-bundle.sh` (remplace la branche `sandbox-bundle`)
    et, pour la mémoire, `OUT=~/memory/livrables/opencut-sandbox make vendor`. Sans cela, la prochaine session ne pourra pas installer hors-ligne.
 
-## Ce qui ne marche pas ici
+## Ce qui ne marche pas ici (mais se fait sur le runner)
 
-Le dire d'emblée plutôt que d'essayer : desktop `apps/desktop` (GPUI : ni GPU, ni affichage, ni toolchain Rust), `crates/media`
-(prebuilt FFmpeg épinglé en 404, ffmpeg.org bloqué), déploiement Cloudflare et `moon run upload-logos` (secrets), `vite dev`
-joignable depuis le navigateur de l'utilisateur (utiliser `make smoke` ou `curl` local). L'éditeur lui-même est encore une page
-« Coming soon » dans l'amont : ne pas promettre de fonctionnalités vidéo qui n'existent pas.
+Dire d'emblée ce qui est impossible dans le sandbox, et proposer le pont `claude-bridge` (skill `sandbox-bridge`, jeton `~/.bridgeenv`) :
+- **Desktop `apps/desktop` (GPUI)** : ni GPU, ni affichage, ni toolchain Rust ici. La **compilation** est vérifiée sur le runner :
+  recette `opencut-desktop-check.sh` (`cargo check --locked`, 199 s, code 0). L'exécution graphique reste impossible.
+- **`crates/media` (FFmpeg)** : le prebuilt épinglé renvoie 404 et ffmpeg.org est bloqué ici. Recette `opencut-ffmpeg-build.sh` : FFmpeg 8.1.3
+  compilé depuis les sources épinglées sur le runner (616 s) ; archive LGPL de 8 Mo dans la mémoire, `livrables/bridge/2026-11-03-ffmpeg-libs/`.
+- **Déploiement Cloudflare, `moon run upload-logos`** : exigent des secrets ; ne pas les confier au runner.
+- **`vite dev`** joignable depuis le navigateur de l'utilisateur : utiliser `make smoke` ou `curl` local.
+L'éditeur lui-même est encore une page « Coming soon » dans l'amont : ne pas promettre de fonctionnalités vidéo qui n'existent pas.
